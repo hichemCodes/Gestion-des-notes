@@ -1,0 +1,63 @@
+
+.large-div {
+     width: 80%;
+}
+
+.card-content .fa-times {
+     position: absolute;
+     top: 20px;
+     right: 20px;
+     font-size: 1.2rem;
+}
+.fa-file-pdf{
+     font-size: 2rem;
+}
+.all_notes {
+     display: flex;
+     flex-direction: column;
+}
+.note_tab {
+     display: flex;
+     flex-direction: column;
+}
+.note_tab form {
+     display: flex;
+justify-content: center;
+align-items: center;
+}
+.note_tab form input {
+     width: 14% !important;
+
+}
+
+
+ .tr_notes th {
+     width: 14% !important;
+     padding-left: 0px !important;
+}
+.ag-header-row.ag-header-row-column {
+     display: flex !important;
+}
+
+.ag-header-row.ag-header-row-column-filter {
+     display: flex !important;
+}
+.wj-flexgrid{
+     width: 69% !important;
+}
+.modif_note {
+     display: flex;
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;
+   
+}
+.fa-circle-check {
+     font-size: 3.5rem;
+     color: #4db6ac !important;
+     margin-top: 20px;
+     cursor: pointer;
+}
+.wj-control { 
+     width: 98.45% !important;
+}

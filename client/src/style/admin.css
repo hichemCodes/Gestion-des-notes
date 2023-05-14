@@ -1,0 +1,86 @@
+.add-admin-icon {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.fa-circle-plus {
+   font-size: 2rem;
+   cursor: pointer;
+   margin-bottom: 5px;
+   color: #9e9e9e;
+}
+.cover-all {
+     width: 100%;
+     height: 100%;
+     background-color: #000000a6;
+     position: fixed;
+     top: 0;
+     left: 0;
+     display: none;
+}
+.cover-all.show {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+select {
+    display: flex !important;
+}
+.crud-select {
+    margin-bottom: 10px;
+    margin-top: 5px;
+}
+.fa-times {
+     position: absolute;
+     top: 20px;
+     right: 20px;
+     font-size: 1.2rem;
+     color: #9e9e9e;
+     cursor: pointer;
+}
+.crufFormSpan {
+    margin-bottom: 25px !important;
+}
+.larg-form {
+    max-height: 600px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+#editForm {
+    display: none;
+}
+.iconsTd {
+    display: flex !important;
+    justify-content: space-around;
+
+}
+td form button {
+    cursor: pointer;
+
+}
+.iconsTd i {
+    cursor: pointer;
+    font-size: 1.2rem;
+    border: none;
+}
+.add-admin-icon {
+    margin: 35px 0px 50px 0px;
+}
+td,th {
+    padding-left: 15px !important;
+}
+.container h4 {
+    margin: 35px 0px 25px 0px !important;
+}
+#toast-container {
+    top: 85% !important;
+    right: 3% !important;
+}
+#toast-container .toast {
+    font-weight: 400 !important;
+}
+.err-toast {
+    color: #ee6e73 !important;
+}

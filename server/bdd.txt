@@ -1,0 +1,503 @@
+CREATE SCHEMA gestion_des_notes ;
+
+create table Annee (
+annee int not null unique,
+entre_note_active bool not null,
+semestre_en_cours int(1) not null,
+session_en_cours int(1) not null
+)DEFAULT CHARACTER SET=utf8;
+
+insert into Annee value (2021, true, 1, 1);
+
+
+DROP procedure IF EXISTS incr_annee;
+CREATE PROCEDURE incr_annee ()
+update Annee set annee = annee + 1,
+			 session_en_cours = 1,
+             semestre_en_cours = 1;
+
+
+
+
+
+DELIMITER $$
+DROP procedure IF EXISTS incr_semestre;
+CREATE PROCEDURE incr_semestre()
+BEGIN
+if(select semestre_en_cours from Annee) = 1 then 
+update Annee set semestre_en_cours=semestre_en_cours+1;
+END IF;
+END;$$
+
+
+
+
+DROP procedure IF EXISTS incr_session;
+CREATE PROCEDURE incr_session ()
+BEGIN
+if (select session_en_cours from Annee) = 1 then
+update annee set session_en_cours = session_en_cours + 1
+END IF
+END;
+
+
+
+
+create table Universite (
+idUniversite varchar(12) not null unique,
+nomUniversite varchar(50) not null,
+constraint PK_Universite primary key (idUniversite)
+)DEFAULT CHARACTER SET=utf8;
+
+create table Faculte (
+idFac varchar(12) not null unique,
+idUniversite varchar(50) not null,
+nomFac varchar(50) not null,
+constraint PK_Faculte primary key (idFac),
+constraint FK_Faculte foreign key (idUniversite) REFERENCES 
+Universite(idUniversite)
+)DEFAULT CHARACTER SET=utf8;
+
+create table Departement(
+idDepartement varchar(20),
+idFac varchar(20),
+nomDepartement varchar(100),
+constraint PK_Departement primary key (idDepartement),
+constraint FK_Departement foreign key (idFac) references
+Faculte(idFac)
+)DEFAULT CHARACTER SET=utf8;
+
+create table Enseignant (
+idEnseignant varchar(25) not null unique,
+mdpEns varchar(70) not null,
+nomEns varchar(40) not null,
+prenomEns varchar(40) not null,
+numEns varchar(25) not null unique,
+constraint PK_Enseignant primary key (numEns)
+)DEFAULT CHARACTER SET=utf8;
+
+create table Formation (
+idForma varchar(12) not null,
+idDepartement varchar(50) not null,
+nomForma varchar(50) not null,
+creditForma int(10) not null,
+numEns varchar(25) not null, 
+constraint PK_Forma primary key (idForma),
+constraint FK_Forma foreign key (numEns) REFERENCES 
+Enseignant(numEns)
+)DEFAULT CHARACTER SET=utf8;
+
+create table Admin (
+numAdmin varchar(25) not null,
+idAdmin varchar(50) not null,
+mdpAdmin varchar(70) not null,
+constraint PK_Admin primary key (numAdmin)
+)DEFAULT CHARACTER SET=utf8;
+
+create table Module(
+idModule varchar(12) not null unique,
+idForma varchar(50) not null,
+nomModule varchar(150) not null,
+semestre int(10) not null,
+creditModule int(10) not null,
+constraint PK_Module primary key (idModule,idForma),
+constraint FK_Module foreign key (idForma) REFERENCES 
+Formation(idForma)
+)DEFAULT CHARACTER SET=utf8;
+
+create table Enseignement(
+idEnseignement varchar(12) not null unique,
+idModule varchar(12) not null,
+numEns varchar(50) not null,
+nomEnseignement varchar(150) not null,
+coeffTP int(10) not null,
+coeffCC1 int(10) not null,
+coeffCC2 int(10) not null,
+coeffExam int(10) not null,
+constraint PK_Enseignement primary key (idEnseignement,idModule),
+constraint FK_Enseignement foreign key (idModule) REFERENCES Module(idModule),
+constraint FK_Enseignement2 foreign key (numEns) REFERENCES 
+Enseignant(numEns)
+)DEFAULT CHARACTER SET=utf8;
+
+create table Etudiant(
+idEtu varchar(50) not null unique,
+mdpEtu varchar(70) not null,
+nomEtu varchar(50) not null,
+prenomEtu varchar(50) not null,
+numEtu varchar(50) not null unique,
+idForma varchar(50) not null,
+constraint PK_Etudiant primary key (numEtu,idEtu),
+constraint FK_Etudiant foreign key (idForma) REFERENCES 
+Formation(idForma)
+)DEFAULT CHARACTER SET=utf8;
+
+create table Note(
+numEtu varchar(50) not null,
+idEnseignement varchar(50) not null,
+noteTP varchar(3),
+noteCC1 varchar(3),
+noteCC2 varchar(3),
+noteExam varchar(3),
+session int(10) not null,
+AnneeUniv varchar(12) not null,
+constraint PK_Note primary key (numEtu,idEnseignement),
+constraint FK_Note foreign key (numEtu) REFERENCES 
+Etudiant(numEtu),
+constraint FK_Note2 foreign key (idEnseignement) REFERENCES 
+Enseignement(idEnseignement)
+)DEFAULT CHARACTER SET=utf8;
+
+
+alter table Enseignement
+drop column noteCC;
+
+ALTER TABLE note CHANGE noteCC1 noteCC int;
+
+alter table note
+drop column noteCC2;
+
+ALTER TABLE note CHANGE noteCC1 noteCC varchar(3);
+
+
+create table Archive(
+idUniversite varchar(12) not null,
+nomUniversite varchar(100) not null,
+idFac varchar(12) not null,
+nomFac varchar(100) not null,
+idDep varchar(20) not null,
+nomDepartement varchar(100) not null,
+idForma varchar(12) not null,
+nomForma varchar(100) not null,
+creditForma int(20) not null,
+semestre int(10) not null,
+idModule varchar(100) not null,
+nomModule varchar(100) not null,
+creditModule int(10) not null,
+idEnseignement varchar(100) not null,
+nomEnseignement varchar(150) not null,
+numEns varchar(100) not null,
+nomEns varchar(100) not null,
+prenomEns varchar(100) not null,
+idEtu varchar(100) not null,
+numEtu varchar(100) not null,
+nomEtu varchar(100) not null, 
+prenomEtu varchar(100) not null,
+noteTP int(10),
+noteCC1 int(10),
+noteCC2 int(10),
+noteExam int(10),
+session int(10) not null,
+AnneeUniv varchar(20) not null
+)DEFAULT CHARACTER SET=utf8;
+
+alter table archive;
+drop column noteCC2;
+
+ALTER TABLE archive CHANGE noteCC1 noteCC varchar(3);
+
+create or replace view univ_vw as
+select *
+from Universite;
+
+create or replace view fac_vw as
+select idFac, f.idUniversite, u.idUniversite as identUniv, nomFac, nomUniversite 
+from Faculte f, Universite u 
+where f.idUniversite = u.idUniversite;
+
+create or replace view dep_vw as
+select idDepartement, f.idFac, u.idFac as identFac,
+nomDepartement, nomFac
+from Departement f, Faculte u 
+where f.idFac = u.idFac;
+
+create or replace view forma_vw as
+select idForma, f.idDepartement, u.idDepartement as identDep,
+nomForma, nomDepartement
+from Formation f, Departement u 
+where f.idDepartement = u.idDepartement;
+
+create or replace view mod_vw as
+select idModule, f.idForma as Formation, m.idForma, nomModule, semestre, creditModule, nomForma
+from Module m, Formation f
+where f.idForma = m.idForma;
+
+create or replace view Enseignement_vw as
+select idEnseignement, nomEnseignement, f.idModule as Module, u.idModule,
+nomModule, f.numEns, e.numEns as Enseignant, coeffTP, coeffCC,
+coeffExam, nomEns
+from Enseignement f, Module u, Enseignant e
+where f.idModule = u.idModule and f.numEns = e.numEns;
+
+
+create or replace view etu_vw as
+select idEtu, nomEtu, prenomEtu, numEtu, e.idForma,
+f.nomForma as Formation 
+from Etudiant e, Formation f
+where e.idForma = f.idForma;
+
+create or replace view ens_vw as
+select idEnseignant, nomEns, prenomEns, numEns
+from Enseignant;
+
+create or replace view archive_note_vw as
+select idModule, nomForma, nomModule, idEnseignement, nomEnseignement,
+idEtu, noteTP, NoteCC
+noteExam, AnneeUniv 
+from Archive;
+
+insert into Universite (idUniversite, nomUniversite) value
+('760001', 'Universite de Rouen Normandie');
+
+insert into Faculte (idFac, idUniversite, nomFac) value
+('0001', '760001', 'UFR Science et Techniques');
+
+insert into Departement (idDepartement, idFac, nomDepartement) value
+('010001', '0001', 'Departement Informatique');
+
+
+insert into Formation (idForma, idDepartement, nomForma, creditForma,
+numEns) values
+("ELB6058", '010001', 'Master 1 Informatique GIL', 60, '88876333'),
+("QDH3513", '010001', 'Master 1 Informatique SSI', 60, "47640354");
+
+insert into Module (idModule, idForma,nomModule, semestre, 
+creditModule) value
+("ITF7250", "ELB6058", "Base de donnees", 1, 10);
+
+insert into Enseignement (idEnseignement, idModule, numEns,
+ nomEnseignement,
+coeffTP, coeffCC1, coeffCC2, coeffExam) value
+("ITF7250BDD", "ITF7250", "82226728", "Base de donnees", 
+40, 0, 0, 60);
+
+
+
+DROP procedure IF EXISTS insert_univ;
+CREATE PROCEDURE insert_univ (IN id varchar(12), IN nom varchar(50))
+insert into Universite(idUniversite, nomUniversite) value (id, nom);
+
+
+
+
+
+DROP procedure IF EXISTS insert_etu;
+CREATE PROCEDURE insert_etu (IN id varchar(50), IN mdp varchar(70), IN nom varchar(50), IN prenom varchar(50), IN num varchar(50), IN forma varchar(50))
+insert into Etudiant(idEtu, mdpEtu, nomEtu, prenomEtu, numEtu, idForma) value (id, mdp, nom, prenom, num, forma);
+
+
+
+DROP procedure IF EXISTS insert_ens;
+CREATE PROCEDURE insert_ens (IN id varchar(25), IN mdp varchar(70), IN nom varchar(40), IN prenom varchar(40), IN num varchar(25))
+insert into Enseignant(idEnseignant, mdpEns, nomEns, prenomEns, numEns) value (id, mdp, nom, prenom, num);
+
+
+
+DROP procedure IF EXISTS insert_univ;CREATE PROCEDURE insert_univ (IN id varchar(12), IN nom varchar(50))
+insert into Universite(idUniversite,nomUniversite) value (id,nom);
+
+
+
+
+DROP procedure IF EXISTS insert_fac;
+CREATE PROCEDURE insert_fac (IN id varchar(12), IN idu varchar(12), IN nom varchar(50))
+insert into Faculte(idFac,idUniversite,nomFac) value (id,idu,nom);
+
+
+
+
+DROP procedure IF EXISTS insert_dep;
+CREATE PROCEDURE insert_dep (IN id varchar(12), IN idf varchar(12), IN nom varchar(50))
+insert into Departement(idDepartement,idFac,nomDepartement) value (id,idf,nom);
+
+
+
+
+DROP procedure IF EXISTS insert_form;CREATE PROCEDURE insert_form (IN id varchar(12), IN idd varchar(12), IN nom varchar(50),IN credit int(10),IN num varchar(25))
+insert into Formation(idForma,idDepartement,nomForma,creditForma,numEns) value (id,idd,nom,credit,num);
+
+
+
+
+DROP procedure IF EXISTS insert_Admin;CREATE PROCEDURE insert_Admin (IN num varchar(25), IN id varchar(50), IN mdp varchar(70))
+insert into Admin(numAdmin,idAdmin,mdpAdmin) value (num,id,mdp);
+
+
+
+
+DROP procedure IF EXISTS insert_mod;CREATE PROCEDURE insert_mod (IN id varchar(12),IN idf varchar(70),IN nom varchar(150),IN sems int(10),IN credit int(10) )
+insert into Module(idModule,idForma,nomModule,semestre,creditModule) value (id,idf,nom,sems,credit);
+
+
+
+
+DROP procedure IF EXISTS insert_Enseignement;CREATE PROCEDURE insert_Enseignement (IN id varchar(12),IN idm varchar(12),IN num varchar(50),IN nom varchar(150),IN ctp int(10),IN ccc1 int(10),IN ccc2 int(10),IN cex int(10) )
+insert into Enseignement(idEnseignement,idModule,numEns,nomEnseignement,coeffTP,coeffCC1,coeffCC2,coeffExam) value (id,idm,num,nom,ctp,ccc1,ccc2,cex);
+
+
+
+
+DROP procedure IF EXISTS insert_note;CREATE PROCEDURE insert_note (IN num varchar(50),IN id varchar(50),IN ntp int(10),IN ncc int(10),IN nex int(10),IN sess int(10),IN auv varchar(12))
+insert into note(numEtu,idEnseignement,noteTP,noteCC,noteExam,session,AnneeUniv) value (num,id,ntp,ncc1,ncc2,nex,sess,auv);
+
+
+
+
+
+DROP procedure IF EXISTS delete_univ;CREATE PROCEDURE delete_univ (IN id varchar(12))
+delete from Universite where idUniversite = id; 
+
+
+
+
+DROP procedure IF EXISTS delete_fac;CREATE PROCEDURE delete_fac (IN id varchar(12))
+
+	delete from Faculte where idFac = id; 
+
+
+
+
+DROP procedure IF EXISTS delete_dep;CREATE PROCEDURE delete_dep (IN id varchar(12))
+delete from Departement where idDepartement = id; 
+
+
+
+
+DROP procedure IF EXISTS delete_ens;CREATE PROCEDURE delete_ens (IN id varchar(12))
+delete from Enseignant where idEnseignant = id; 
+
+
+
+
+DROP procedure IF EXISTS delete_form;CREATE PROCEDURE delete_form (IN id varchar(12))
+delete from Formation where idForma = id; 
+
+
+
+DROP procedure IF EXISTS delete_mod;CREATE PROCEDURE delete_mod (IN num varchar(12))
+delete from Module where idModule = num; 
+
+
+
+
+DROP procedure IF EXISTS delete_Enseignement;CREATE PROCEDURE delete_Enseignement (IN id varchar(12))
+delete from Enseignement where idEnseignement = id; 
+
+
+
+
+DROP procedure IF EXISTS delete_etu;CREATE PROCEDURE delete_etu (IN id varchar(12))
+delete from Etudiant where idEtu = id; 
+
+
+
+
+DROP procedure IF EXISTS delete_note;CREATE PROCEDURE delete_note (IN num varchar(12))
+delete from Note where numEtu = num; 
+
+DROP procedure IF EXISTS update_univall;CREATE PROCEDURE update_univall (IN id varchar(12),IN nom varchar(50))
+	update Universite set nomUniversite=nom,idUniversite= id 
+	where idUniversite=id; 
+
+
+DROP procedure IF EXISTS update_univall;CREATE PROCEDURE update_univall (IN id varchar(12),IN nom varchar(50))
+	update Universite set nomUniversite=nom
+		where idUniversite=id; 
+
+
+
+DROP procedure IF EXISTS update_facall;CREATE PROCEDURE update_facall (IN id varchar(12),IN nom varchar(50), IN idUniv varchar(12))
+	update Faculte set nomFac=nom,idUniversite = idUniv
+    where idFac=id; 
+
+
+
+DROP procedure IF EXISTS update_depall;CREATE PROCEDURE update_depall (IN id varchar(12),IN nom varchar(100), IN idF varchar(12))
+	update Departement set nomDepartement=nom,idFac = idF
+	where idDepartement=id; 
+
+
+
+DROP procedure IF EXISTS update_ensall;CREATE PROCEDURE update_ensall ( IN num varchar(25), IN id varchar(12),IN nom varchar(40), IN prenom varchar(40))
+	update Enseignant set idEnseignant = id,nomEns = nom, prenomEns = prenom
+	where numEns=num; 
+
+
+
+DROP procedure IF EXISTS update_formall;CREATE PROCEDURE update_formall (IN id varchar(12),IN nom varchar(50), IN idDep varchar(12), IN credit int(10), IN numEn varchar(12))
+	update Formation set nomForma=nom,idDepartement = idDep,creditForma = credit,numEns = numEn
+    where idForma=id; 
+
+
+
+DROP procedure IF EXISTS update_modall;CREATE PROCEDURE update_modall (IN id varchar(12),IN nom varchar(150), IN idForm varchar(12), IN seme int(10), IN credit int(10))
+	update Module set nomModule=nom,idForma = idForm,semestre = seme,creditModule = credit
+    where idModule=id; 
+
+
+
+
+DROP procedure IF EXISTS update_Enseignementall;CREATE PROCEDURE update_Enseignementall (IN id varchar(12),IN num varchar(50), IN idM varchar(12), IN nom varchar(50), IN cTP int(10), IN cCC int(10), IN cExam int(10))
+	update Enseignement set numEns=num,idModule = idM,nomEnseignement = nom,coeffTP = cTP,coeffCC = cCC,coeffExam = cExam
+    where idEnseignement=id; 
+
+
+
+DROP procedure IF EXISTS update_etuall;CREATE PROCEDURE update_etuall (IN num varchar(12),IN id varchar(50), IN nom varchar(50), IN prenom varchar(50), IN forma varchar(12))
+	update Etudiant set idEtu = id,nomEtu = nom,prenomEtu = prenom,idForma = forma 
+	where numEtu=num; 
+
+
+
+DROP procedure IF EXISTS update_noteall;CREATE PROCEDURE update_noteall (IN num varchar(50), IN TP int(10), IN CC int(10), IN exam int(10))
+	update Note set noteTP = TP,noteCC = CC,noteExam = exam
+    where numEtu=num;
+
+
+
+
+
+DROP procedure IF EXISTS insert_archive;
+CREATE PROCEDURE insert_archive ()
+insert into archive
+select univ.nomUniversite, univ.idUniversite, fac.nomFac, fac.idFac, dep.nomDepartement, dep.idDepartement, forma.nomForma, forma.idForma,  forma.creditForma,  modu.semestre, modu.idModule, modu.nomModule,  modu.creditModule, ensgmt.idEnseignement, ensgmt.nomEnseignement, ens.numEns, ens.nomEns, ens.prenomEns, etu.idEtu, etu.numEtu, etu.nomEtu, etu.prenomEtu, n.noteTP, n.noteCC, n.noteExam,n.session, n.AnneeUniv
+from Note n, Etudiant etu, Enseignant ens, Enseignement ensgmt, Module modu, Formation forma, Departement dep, Faculte fac, Universite univ
+where n.numEtu = etu.numEtu and n.idEnseignement = ensgmt.idEnseignement and ensgmt.numEns = ens.numEns and ensgmt.idModule = modu.idModule and modu.idForma = forma.idForma and forma.idDepartement = dep.idDepartement and dep.idFac = fac.idFac and fac.idUniversite = univ.idUniversite;
+
+
+
+
+
+
+
+
+DROP procedure IF EXISTS delete_archive;
+CREATE PROCEDURE delete_archive (IN annee varchar(12))
+delete from archive where AnneeUniv = annee;
+
+
+
+
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS Insert_note_when_insert_etu;
+CREATE TRIGGER Insert_note_when_insert_etu AFTER INSERT ON Etudiant
+FOR EACH ROW
+BEGIN
+DECLARE done INT DEFAULT FALSE;
+DECLARE c1 VARCHAR(12);
+DECLARE cur CURSOR FOR select e.idEnseignement from Enseignement e INNER JOIN Module m ON e.idModule=m.idModule where m.idForma=new.idForma;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done=TRUE;
+OPEN cur;
+ins_loop: LOOP
+FETCH cur INTO c1;
+IF done THEN
+LEAVE ins_loop;
+END IF;
+insert into note(numEtu, idEnseignement, noteTP,noteCC, noteExam,session, AnneeUniv) value(new.numEtu, c1 , null, null, null, 1, (select concat(convert(annee,char), "-", convert(annee + 1, char)) from Annee));
+END LOOP;
+CLOSE cur;
+END$$
+
+create view archive_note as
+select noteTP, noteCC,noteExam, semestre, numEtu from archive;
